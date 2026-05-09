@@ -55,12 +55,19 @@ add_subdirectory(mbedtls)
 add_subdirectory(blake2sp)
 add_subdirectory(BLAKE3)
 
+set(NTDLLP_ARCH "i386")
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(NTDLLP_ARCH "amd64")
+endif()
+
 add_library(${PROJECT_NAME} SHARED
         Hasher2.cpp
         FakeCrt.cpp
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}_${OHT_FLAVOR}")
+
+target_link_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/ntdllp/win7/${NTDLLP_ARCH}")
 
 target_link_libraries(${PROJECT_NAME}
         XKCP
