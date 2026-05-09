@@ -25,18 +25,18 @@
 // To fix this scenario we find the first folder from the end that does exist, and unshorten until that point, so that
 // the previous example will become `C:\FolderWithLongName\SUBFOL~1`
 static std::wstring NormalizePath(std::wstring_view path) {
-  const auto long_compat = utl::MakePathLongCompatible(std::wstring{path});
+  const std::wstring path_str{path};
   const auto pbuf = std::make_unique<wchar_t[]>(PATHCCH_MAX_CCH);
   std::wstring full;
   {
     const auto ret = GetFullPathNameW(
-      long_compat.c_str(),
+      path_str.c_str(),
       PATHCCH_MAX_CCH,
       pbuf.get(),
       nullptr
     );
     if (ret == 0)
-      return utl::MakePathLongCompatible(long_compat);
+      return utl::MakePathLongCompatible(path_str);
     full = pbuf.get();
   }
   auto slash = full.rbegin();

@@ -189,11 +189,23 @@ bool utl::AreFilesTheSame(HANDLE a, HANDLE b) {
 }
 
 std::wstring utl::MakePathLongCompatible(std::wstring file) {
-  static constexpr wchar_t prefix[] = L"\\\\";
-  static constexpr auto prefixlen = std::size(prefix) - 1;
+  static constexpr wchar_t prefix[] = L"\\\\?\\";
   const auto file_cstr = file.c_str();
-  if (file.size() < prefixlen || 0 != wcsncmp(file_cstr, prefix, prefixlen))
+
+  if (file.size() >= 4 && 0 == wcsncmp(file_cstr, prefix, 4))
+    return file;
+
+  if (file.size() >= 2 && file[0] == L'\\' && file[1] == L'\\') {
+    // UNC paths must be prefixed with "\\?\UNC\"
+    file.erase(0, 2);
+    file.insert(0, L"\\\\?\\UNC\\");
+    return file;
+  }
+
+  // Only prefix absolute drive paths, not relative ones.
+  if (file.size() >= 3 && file[1] == L':' && (file[2] == L'\\' || file[2] == L'/'))
     file.insert(0, L"\\\\?\\");
+
   return file;
 }
 
